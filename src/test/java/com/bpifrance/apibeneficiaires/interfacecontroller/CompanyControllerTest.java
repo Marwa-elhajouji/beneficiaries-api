@@ -28,29 +28,52 @@ class CompanyControllerTest {
     private GetBeneficiariesUseCase useCase;
 
     @Test
-    void should_return_200_with_one_effective_beneficiary() throws Exception {
+    void should_return_200_with_individuals() throws Exception {
         Beneficiary b = new Beneficiary("1", Type.INDIVIDUAL, new Percentage(30));
+        when(useCase.execute("123", "individuals")).thenReturn(Optional.of(List.of(b)));
 
-        when(useCase.execute("123", "effective")).thenReturn(Optional.of(List.of(b)));
-
-        mockMvc.perform(get("/companies/123/beneficiaries?type=effective"))
+        mockMvc.perform(get("/companies/123/beneficiaries?type=individuals"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].percentage").value(30.0));
+                .andExpect(jsonPath("$[0].id").value("1"));
     }
 
     @Test
-    void should_return_204_when_beneficiaries_list_is_empty() throws Exception {
-        when(useCase.execute("123", "effective")).thenReturn(Optional.of(List.of()));
+    void should_return_200_with_direct_beneficiaries() throws Exception {
+        Beneficiary b = new Beneficiary("1", Type.INDIVIDUAL, new Percentage(30));
+        when(useCase.execute("123", "direct")).thenReturn(Optional.of(List.of(b)));
 
-        mockMvc.perform(get("/companies/123/beneficiaries?type=effective"))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/companies/123/beneficiaries?type=direct"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("1"));
     }
+
+    @Test
+    void should_return_200_with_indirect_beneficiaries() throws Exception {
+        Beneficiary b = new Beneficiary("yves", Type.INDIVIDUAL, new Percentage(40));
+        when(useCase.execute("456", "indirect")).thenReturn(Optional.of(List.of(b)));
+
+        mockMvc.perform(get("/companies/456/beneficiaries?type=indirect"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("yves"));
+    }
+
+    @Test
+    void should_return_200_with_combined_beneficiaries() throws Exception {
+        Beneficiary b = new Beneficiary("yves", Type.INDIVIDUAL, new Percentage(58));
+        when(useCase.execute("789", "combined")).thenReturn(Optional.of(List.of(b)));
+
+        mockMvc.perform(get("/companies/789/beneficiaries?type=combined"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("yves"))
+                .andExpect(jsonPath("$[0].percentage").value(58.0));
+    }
+
 
     @Test
     void should_return_404_when_company_not_found() throws Exception {
-        when(useCase.execute("999", "effective")).thenReturn(Optional.empty());
+        when(useCase.execute("999", "direct")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/companies/999/beneficiaries?type=effective"))
+        mockMvc.perform(get("/companies/999/beneficiaries?type=direct"))
                 .andExpect(status().isNotFound());
     }
 }

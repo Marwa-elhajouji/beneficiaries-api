@@ -1,6 +1,5 @@
 package com.bpifrance.apibeneficiaires;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.bpifrance.apibeneficiaires.domain.model.Beneficiary;
-import com.bpifrance.apibeneficiaires.domain.model.Company;
-import com.bpifrance.apibeneficiaires.domain.valueobject.Percentage;
-import com.bpifrance.apibeneficiaires.infrastructure.repository.InMemoryCompanyRepository;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -24,26 +18,35 @@ public class CompanyIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private InMemoryCompanyRepository companyRepository;
-
-    @BeforeAll
-    void setup() {
-        Company company = new Company("123", "TestCorp");
-        company.addBeneficiary(new Beneficiary("1", Beneficiary.Type.INDIVIDUAL, new Percentage(30)));
-        companyRepository.save(company);
-    }
-
     @Test
-    void should_return_200_with_data() throws Exception {
-        mockMvc.perform(get("/companies/123/beneficiaries?type=all"))
+    void should_return_direct_effectives() throws Exception {
+        mockMvc.perform(get("/companies/123/beneficiaries?type=direct"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].percentage").exists());
+                .andExpect(jsonPath("$[0].id").value("1"))
+                .andExpect(jsonPath("$[0].type").value("INDIVIDUAL"))
+                .andExpect(jsonPath("$[0].percentage").value(30.0));
     }
 
     @Test
-    void should_return_404_if_company_not_found() throws Exception {
-        mockMvc.perform(get("/companies/999/beneficiaries"))
+    void should_return_indirect_effectives() throws Exception {
+        mockMvc.perform(get("/companies/456/beneficiaries?type=indirect"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("yves"))
+                .andExpect(jsonPath("$[0].type").value("INDIVIDUAL"))
+                .andExpect(jsonPath("$[0].percentage").value(40.0));
+    }
+
+    @Test
+    void should_return_combined_effectives() throws Exception {
+        mockMvc.perform(get("/companies/789/beneficiaries?type=combined"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("yves"))
+                .andExpect(jsonPath("$[0].percentage").value(64.0));
+    }
+
+    @Test
+    void should_return_not_found_for_unknown_company() throws Exception {
+        mockMvc.perform(get("/companies/999/beneficiaries?type=direct"))
                 .andExpect(status().isNotFound());
     }
 }
