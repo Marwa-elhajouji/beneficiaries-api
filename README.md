@@ -32,10 +32,23 @@ The API will be available at: http://localhost:8080
 
 This will run all unit and integration tests.
 ```
+##  API Testing with Postman
+
+You can test the API endpoints using Postman.
+
+###  Available requests
+
+| Endpoint | Description | Example |
+|---------|-------------|---------|
+| `GET /companies/123/beneficiaries?type=all` | Get all beneficiaries (direct + indirect + combined) | 
+| `GET /companies/123/beneficiaries?type=individuals` | Get only individuals | Returns only type `INDIVIDUAL` |
+| `GET /companies/123/beneficiaries?type=direct` | Get direct effective beneficiaries | Returns direct > 25% |
+| `GET /companies/456/beneficiaries?type=indirect` | Get indirect beneficiaries | Should return beneficiaries via another company |
+| `GET /companies/789/beneficiaries?type=combined` | Get combined direct and indirect beneficiaries | Returns combined percentage > 25% |
 
 ## Project Structure
 
-The project is organized using Clean Architecture and Domain-Driven Design (DDD):
+The project is organized using Clean Architecture (Hexagonal) and Domain-Driven Design (DDD):
 
 - domain.model: domain entities like Company, Beneficiary, Percentage
 
@@ -62,6 +75,8 @@ The project is organized using Clean Architecture and Domain-Driven Design (DDD)
 - Move business logic (`BeneficiaryFilter`) directly into the domain to follow rich domain principles (DDD)
 
 - Add code coverage tracking 
+
+- Improved test execution control (unit vs integration separation)
  
 
 
