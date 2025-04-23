@@ -40,11 +40,12 @@ You can test the API endpoints using Postman.
 
 | Endpoint | Description | Example |
 |---------|-------------|---------|
-| `GET /companies/123/beneficiaries?type=all` | Get all beneficiaries (direct + indirect + combined) | 
+| `GET /companies/123/beneficiaries?type=all` | Get all beneficiaries (direct + indirect + combined) | Returns 1 result |
 | `GET /companies/123/beneficiaries?type=individuals` | Get only individuals | Returns only type `INDIVIDUAL` |
 | `GET /companies/123/beneficiaries?type=direct` | Get direct effective beneficiaries | Returns direct > 25% |
 | `GET /companies/456/beneficiaries?type=indirect` | Get indirect beneficiaries | Should return beneficiaries via another company |
 | `GET /companies/789/beneficiaries?type=combined` | Get combined direct and indirect beneficiaries | Returns combined percentage > 25% |
+| `GET /companies/999/beneficiaries?type=direct` | Error case: Company does not exist | Returns 404 Not Found |
 
 ## Project Structure
 
@@ -77,7 +78,7 @@ The project is organized using Clean Architecture (Hexagonal) and Domain-Driven 
 - Add code coverage tracking 
 
 - Improved test execution control (unit vs integration separation)
- 
+- Add a linter to the project 
 
 
 
